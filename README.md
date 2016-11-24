@@ -16,6 +16,6 @@ Option ONLY_WARN checks updates and alerts about this email.
 Example:
 ONLY_WARN="catalyst-utils"
 
-Auto start on schedule: systemctl enable repocheckver.timer
+Auto start on schedule: systemctl enable repo-upd.timer
 
-To run manually: systemctl start repocheckver
+To run manually: systemctl start repo-upd
