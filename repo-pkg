@@ -291,7 +291,7 @@ add_pkg() {
      fi
      if [ $find_arch -eq 0 ]; then
         show_message ARCH_NOT_SUPPORTED $PKG_BUILD
-        exit 1
+        exit 0
      fi
   fi
 
