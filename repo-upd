@@ -1,0 +1,279 @@
+#! /bin/bash
+
+CURRENT_VERSION=0.0.0
+INSTALL_PREFIX=/usr
+PO_DIR=${INSTALL_PREFIX}/share/repotools
+CONFIG_FILE=/etc/repotools.conf
+BASE_NAME=`basename "$0"`
+
+#Loading message file
+if [ -f "${PO_DIR}/$BASE_NAME.messages" ]; then
+   . "${PO_DIR}/$BASE_NAME.messages"
+else
+  case $lang in
+       ru) echo -e "\e[31mОшибка:\e[0m не найден файл $BASE_NAME.messages в '${PO_DIR}'!!!";;
+       uk) echo -e "\e[31mПомилка:\e[0m не знайдений файл $BASE_NAME.messages у '${PO_DIR}'!!!";;
+       *)  echo -e "\e[31mError:\e[0m file $BASE_NAME.messages not found in '${PO_DIR}'!!!";;
+  esac
+  exit 1
+fi
+
+if ! [ -f $CONFIG_FILE ]; then
+   show_message NOT_FOUND_CONFIG $CONFIG_FILE
+   exit 1
+else
+   . "$CONFIG_FILE"
+fi
+
+#========================
+set_options(){
+  while [ ! -z "$1" ]; do
+        case $1 in
+                 -m)
+                    SEND_MAIL=1
+                    ;;
+                 -b)
+                    AUTO_BUILD=1
+                    ;;
+                 -a)
+                    ALL_BUILD=1
+                    AUTO_BUILD=1
+                    ;;
+                 -f=*)
+                    FROM_ADDRESS=$(echo "$1" | sed 's/-f=//')
+                    ;;
+                 -t=*)
+                    TO_ADDRESS=$(echo "$1" | sed 's/-t=//')
+                    ;;
+                 -m=*)
+                    MAIL_FILE=$(echo "$1" | sed 's/-m=//')
+                    ;;
+                 -r=*)
+                    FROM_TEXT=$(echo "$1" | sed 's/-r=//')
+                    ;;
+                 -s=*)
+                    SUBJECT_TEXT=$(echo "$1" | sed 's/-s=//')
+                    ;;
+                 -v)
+                    show_message CURRENT_VERSION
+                    exit 0
+                    ;;
+                 -h|--help)
+                    show_message SHOW_USAGE
+                    exit 0
+                    ;;
+                 -d)
+                    MAIL_SEND_DEBUG=1
+                    ;;
+                 *) show_message UNKNOWN_ARG $1
+                    exit 1
+                    ;;
+        esac
+        shift
+  done
+
+  if [[ $SEND_MAIL -eq 1 ]]; then
+     if [ -z $FROM_ADDRESS ]; then
+        show_message NOT_SPECIFIED_PARAMETER "-f (from address)"
+        exit 1
+     fi
+     if [ -z $TO_ADDRESS ]; then
+        show_message NOT_SPECIFIED_PARAMETER "-t (to address)"
+        exit 1
+     fi
+     if [ -z $MAIL_TEMP ]; then
+        show_message NOT_SPECIFIED_PARAMETER "-m (mail file)"
+        exit 1
+    fi
+    if [ -f $MAIL_TEMP ]; then
+       rm $MAIL_TEMP
+    fi
+  fi
+}
+
+#========================
+check_repotoolsconf(){
+
+  if [ ! -d "${REPO_DIR}" ]; then
+     show_message DIRECTORY_NOT_FOUND "$REPO_DIR"
+     exit 1
+  fi
+
+  if [[ $AUTO_BUILD -ne 1 ]]; then
+     if [ -z "$CHROOT_DIR" ]; then
+        show_message VAR_NOT_SET "CHROOT_DIR"
+        exit 1
+     fi
+     if [ -z "$LIST_ARCH" ]; then
+        show_message VAR_NOT_SET "LIST_ARCH"
+        exit 1
+     fi
+     for i in $LIST_ARCH; do
+         if [ "$i" = "any" ]; then
+            continue
+         fi
+         if ! [ -d "$CHROOT_DIR/$i" ]; then
+            show_message DIRECTORY_NOT_FOUND "$CHROOT_DIR/$i"
+            exit 1
+         fi
+         mountchroot "$CHROOT_DIR/$i"
+    done
+  fi
+
+  if [ -z "$DEFAULT_USER_REPO" ]; then
+     show_message VAR_NOT_SET "DEFAULT_USER_REPO"
+     exit 1
+  else
+     id -un "$DEFAULT_USER_REPO" 2>/dev/null 1>/dev/null
+     if [ "$?" = 1 ]; then
+        show_message USER_NOT_EXIST "$DEFAULT_USER_REPO"
+        exit 1
+     fi
+  fi
+  if [ -z "$REPO_PKG_DIR" ]; then
+      show_message VAR_NOT_SET "REPO_PKG_DIR"
+      exit 1
+  fi
+  if [ -z "$LIST_ARCH" ]; then
+     show_message VAR_NOT_SET "LIST_ARCH"
+     exit 1
+  else
+     for i in $LIST_ARCH; do
+         if ! [ -d "$REPO_PKG_DIR/$i" ]; then
+            show_message DIRECTORY_NOT_FOUND "$REPO_PKG_DIR/$i"
+            exit 1
+         fi
+     done
+  fi
+  if [ -z "$ARCH_BUILD_ANY" ]; then
+     show_message VAR_NOT_SET "ARCH_BUILD_ANY"
+     exit 1
+  fi
+  if ! [ -d "$REPO_PKG_DIR" ]; then
+     show_message DIRECTORY_NOT_FOUND "$REPO_PKG_DIR"
+     exit 1
+  fi
+}
+
+#========================
+mountchroot(){
+  local CHROOT_DIR
+
+  CHROOT_DIR=$1
+  `mount | grep -q $CHROOT_DIR/proc > /dev/null`
+  if [ $? -ne 0 ]; then
+     mount -t proc proc $CHROOT_DIR/proc
+  fi
+  `mount | grep -q $CHROOT_DIR/sys > /dev/null`
+  if [ $? -ne 0 ]; then
+     mount --rbind /sys $CHROOT_DIR/sys
+  fi
+  `mount | grep -q $CHROOT_DIR/dev > /dev/null`
+  if [ $? -ne 0 ]; then
+     mount --rbind /dev $CHROOT_DIR/dev
+  fi
+}
+
+#========================
+pkgbuild(){
+
+  if [[ $AUTO_BUILD -ne 1 ]]; then
+     return
+  fi
+  for i in $LIST_ARCH; do
+      if [ "$i" = "any" ]; then
+         continue
+      elif [ "$i" = "i686" ]; then
+         linux32 chroot --userspec=pkg "$CHROOT_DIR/$i" repo-pkg -p=$pkgname
+      else
+         chroot --userspec=pkg "$CHROOT_DIR/$i" repo-pkg -p=$pkgname
+      fi
+      if [ $? -ne 0 ]; then
+         show_message FAILED_BUILD_PACKAGE $pkgname
+         exit 1
+      else
+         if [[ $SEND_MAIL -eq 1 ]]; then
+            show_message SUCCESSFULLY_BUILD_PACKAGE "$pkgname" "$i" >> $MAIL_TEMP
+         else
+            show_message SUCCESSFULLY_BUILD_PACKAGE "$pkgname" "$i"
+         fi
+      fi
+   done
+}
+
+if [[ $EUID -ne 0 ]]; then
+   show_message I_M_NOT_ROOT
+   exit 1
+fi
+
+#if [[ ! -n $PACMAN_CONF ]]; then
+#   show_message NOT_FOUND_CONFIG $PACMAN_CONF
+#  exit
+#fi
+
+set_options $*
+
+cd "${REPO_DIR}"
+if [ -n "$REPO_CONF" ]; then
+   if [ -f $REPO_CONF ]; then
+      source $REPO_CONF
+   fi
+fi
+for DIR in * ; do
+    if ! [ -d $DIR ]; then
+       continue
+    fi
+    if ! [ -f $DIR/PKGBUILD ]; then
+       continue
+    fi
+    source $DIR/PKGBUILD
+    if [ -n "$REPO_CONF" ]; then
+       not_handle=0
+       for i in $NOT_HANDLE; do
+           if [ $i ==  $pkgname ]; then
+              not_handle=1
+              break
+           fi
+       done
+       if [ $not_handle -eq 1 ]; then
+          continue
+       fi
+    fi
+    if [[ $ALL_BUILD -eq 1 ]]; then
+       pkgbuild $pkgname
+    else
+       PKGVER_AUR=`package-query --aur-url https://aur.archlinux.org -Aif %v $pkgname`
+       if [ -z "$PKGVER_AUR" ]; then
+          if [[ $SEND_MAIL -eq 1 ]]; then
+             show_message PACKAGE_NOT_FOUND_AUR $pkgname >> $MAIL_TEMP
+          else
+             show_message PACKAGE_NOT_FOUND_AUR $pkgname
+          fi
+          continue
+       fi
+       if [ "$PKGVER_AUR" != "$pkgver-$pkgrel" ]; then
+          if [[ $SEND_MAIL -eq 1 ]]; then
+             show_message VERSION_PACKAGE_DIFFERENT "$pkgname" >> $MAIL_TEMP
+             show_message IN_AUR_REPOSITORY $PKGVER_AUR >> $MAIL_TEMP
+             show_message IN_LOCAL_REPOSITORY "$pkgver-$pkgrel" >> $MAIL_TEMP
+             pkgbuild $pkgname
+          else
+             show_message VERSION_PACKAGE_DIFFERENT "$pkgname"
+             show_message IN_AUR_REPOSITORY $PKGVER_AUR
+             show_message IN_LOCAL_REPOSITORY "$pkgver-$pkgrel"
+             pkgbuild $pkgname
+          fi
+       fi
+    fi
+done
+
+if [[ $SEND_MAIL -eq 1 ]]; then
+   if [ -f /bin/smail ]; then
+      if [ -f $MAIL_TEMP ]; then
+         smail -f=$FROM_ADDRESS -t=$TO_ADDRESS -m=$MAIL_TEMP -s=$SUBJECT_TEXT -r=$FROM_TEXT
+      fi
+   else
+      show_message FILE_NOT_FOUND "/bin/smail"
+   fi
+fi
+

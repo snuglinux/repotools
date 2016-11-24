@@ -1,0 +1,358 @@
+lang=`echo $LANG | cut -b 1,2`
+
+show_message() {
+case $1 in
+##############
+SHOW_USAGE)############################################################
+##############
+case $lang in
+ru)
+cat <<EOFUSAGE
+repo-pkg - Скрипт для автоматизации работы с локальным AUR репозиторием.
+Умеет автоматически получать данные из AUR, собирать пакеты, добавлять
+или удалять из локального репозитория.
+
+Используются следующие опции командной строки:
+				
+ -p : (package name) Имя собираемого пакета с последующим добавлением в репозитрий.
+				
+ -d : (del package name) Удаляемый пакет из репозитория.
+				
+ -v --version : Версия скрипта.
+				
+ -h --help: Показать справку и выйти.
+				
+Пример: repopkg -p=repotools
+
+EOFUSAGE
+;;
+
+uk)
+cat <<EOFUSAGE
+repo-pkg - Скрипт для автоматизації роботи з локальним AUR репозиторієм.
+Вміє автоматично отримувати дані з AUR, збирати пакети, додавати або видаляти
+з локального репозиторія.
+
+Використовуються наступні опції командного рядка:
+				
+ -p : (package name) Ім'я зібраного пакету.
+				
+ -d : (del package name) Вилучаємий пакет з репозиторію.
+				
+ -v --version : Версія скрипта.
+				
+ -h --help : Показати довідку і вийти.
+				
+Приклад: repopkg -p=repotools
+
+EOFUSAGE
+;;
+
+*)
+cat << EOFUSAGE
+repo-pkg - Script for automation of work with local AUR repository.
+Can automatically obtain the data from the AUR, build packages, add to 
+or delete from the local repository.
+
+Use the following command line options:
+				
+ -p : (package name) The name of the assembled package.
+				
+ -d : (del package name) Remove the package from the repository.
+				
+ -v --version : Version of the script.
+				
+ -h --help : Show help and exit.
+				
+Example: repopkg -p=repotools
+
+EOFUSAGE
+;;
+esac
+;;
+
+#############
+CURRENT_VERSION)
+#############
+case $lang in
+ru) echo -e "Версия скрипта ${CURRENT_VERSION}"
+;;
+uk) echo -e "Версія скрипта ${CURRENT_VERSION}"
+;;
+*)  echo -e "Script version ${CURRENT_VERSION}"
+esac
+;;
+
+################
+FILE_NOT_FOUND*)#######################################################
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Файл $FC_3$2$FC_0 не найден";;
+uk) echo -e "$FC_2Помилка:$FC_0 Файл $FC_3$2$FC_0 не знайдено";;
+*)  echo -e "$FC_2ERROR:$FC_0 File $FC_3$2$FC_0 not found";;
+esac
+;;
+
+###############
+UNKNOWN_ARG)##########################################################
+###############
+case $lang in
+ru) echo -e "Неизвестный аргумент $FC_3$2$FC_0";;
+uk) echo -e "Невідомий аргумент $FC_3$2$FC_0";;
+*)  echo -e "Unknown argement $FC_3$2$FC_0";;
+esac
+;;
+
+###############
+VAR_NOT_SET*)##########################################################
+###############
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Переменная $FC_3$2$FC_0 не установлена";;
+uk) echo -e "$FC_2Помилка:$FC_0 Змінна $FC_3$2$FC_0 не встановлена";;
+*)  echo -e "$FC_2ERROR:$FC_0 Variable $FC_3$2$FC_0 not set";;
+esac;;
+
+################
+RUN_ROOT_NOT_PERMITTED*)##########################################################
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Запуск $FC_3$2$FC_0 от имени суперпользователя не разрешён";;
+uk) echo -e "$FC_2Помилка:$FC_0 Запуск $FC_3$2$FC_0 від імені суперкористувача не дозволений";;
+*)  echo -e "$FC_2ERROR:$FC_0 Run $FC_3$2$FC_0 as root is not permitted";;
+esac;;
+
+###########
+NO_ARCHIVE)##############################################################
+###########
+case $lang in
+ru) echo -e "$FC_3$2$FC_0 не является архивом";;
+uk) echo -e "$FC_3$2$FC_0 не є архівом";;
+*)  echo -e "$FC_3$2$FC_0 is not an archive";;
+esac;;
+
+###########
+WORK_DIR)##############################################################
+###########
+case $lang in
+ru) echo -e "Изменение рабочей директории на $FC_3$2$FC_0";;
+uk) echo -e "Зміна робочої директорії на $FC_3$2$FC_0";;
+*)  echo -e "Changing working dir to $FC_3$2$FC_0";;
+esac;;
+
+###########
+BT_DIR_NOT_WRITABLE)##############################################################
+###########
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Временная директория $FC_3$2$FC_0 не доступна для записи";;
+uk) echo -e "$FC_2Помилка:$FC_0 Тимчасова директорія $FC_3$2$FC_0 не доступна для запису";;
+*)  echo -e "$FC_2ERROR:$FC_0 Temp directory $FC_3$2$FC_0 is not writable";;
+esac;;
+
+############
+YES_OR_NO)##############################################################i
+###########
+case $lang in
+ru) echo -e "Введите $FC_3yes$FC_0 или $FC_3no$FC_0";;
+uk) echo -e "Введіть $FC_3yes$FC_0 или $FC_3no$FC_0";;
+*)  echo -e "Please enter $FC_3yes$FC_0 or $FC_3no$FC_0";;
+esac;;
+
+##########
+WRITING_TO*)##############################################################i
+############
+case $lang in
+ru) echo -e "Файл записан в директорию $FC_3$2$FC_0";;
+uk) echo -e "Файл записаний в директорію $FC_3$2$FC_0";;
+*)  echo -e "File be written in $FC_3$2$FC_0";;
+esac;;
+
+##########
+OVERWRITE_FILE*)###################################################
+############
+case $lang in
+ru) echo -e "Перезаписать файл $FC_3$2$FC_0?";;
+uk) echo -e "Перезаписати файл $FC_3$2$FC_0?";;
+*)  echo -e "Overwrite the file $FC_3$2$FC_0?";;
+esac;;
+
+##########
+FAILED_TO_CREATE_DIR*)###################################################
+############
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось создать каталог $FC_3$2$FC_0";;
+uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося створити каталог $FC_3$2$FC_0";;
+*)  echo -e "$FC_2ERROR:$FC_0 Failed to create directory $FC_3$2$FC_0";;
+esac;;
+
+##########
+NOT_FOUND_CONFIG*)###################################################
+############
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Не найден конфигурационный файл $FC_3$2$FC_0";;
+uk) echo -e "$FC_2Помилка:$FC_0 Не знайдено конфігураційний файл $FC_3$2$FC_0";;
+*)  echo -e "$FC_2ERROR:$FC_0 Not found config file $FC_3$2$FC_0";;
+esac;;
+
+##########
+NOT_SPECIFIED_PARAMETER*)###################################################
+############
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Не указан параметр $FC_3$2$FC_0";;
+uk) echo -e "$FC_2Помилка:$FC_0 Не вказано параметр $FC_3$2$FC_0";;
+*)  echo -e "$FC_2ERROR:$FC_0 Not specified parameter $FC_3$2$FC_0";;
+esac;;
+
+#############
+DIRECTORY_NOT_FOUND*)
+#############
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Каталог $FC_3$2$FC_0 не найден"
+;;
+uk) echo -e "$FC_2Помилка:$FC_0 Каталог $FC_3$2$FC_0 не знайдено"
+;;
+*)  echo -e "$FC_2ERROR:$FC_0 Directory $FC_3$2$FC_0 not found"
+esac
+;;
+
+#############
+PACKAGE_NOT_FOUND_AUR*)
+#############
+case $lang in
+ru) echo -e "Пакет $FC_2$2$FC_0 не найден в AUR"
+;;
+uk) echo -e "Пакет $FC_2$2$FC_0 не знайдено в AUR"
+;;
+*)  echo -e "Package $FC_2$2$FC_0 not found in the AUR"
+esac
+;;
+
+#############
+PACKAGE_LIST_EXCEPTION*)
+#############
+case $lang in
+ru) echo -e "Пакет $FC_3$2$FC_0 занесен в список исключений"
+;;
+uk) echo -e "Пакет $FC_3$2$FC_0 занесений до списку виключень"
+;;
+*)  echo -e "The package $FC_3$2$FC_0 is listed in the exceptions list"
+esac
+;;
+
+#############
+PACKAGE_LIST_ONLY_WARN*)
+#############
+case $lang in
+ru) echo -e "Пакет $FC_3$2$FC_0 занесен в список только предупреждения"
+;;
+uk) echo -e "Пакет $FC_3$2$FC_0 занесений до списку тільки попередження"
+;;
+*)  echo -e "The package $FC_3$2$FC_0 is listed in the only warning list"
+esac
+;;
+
+################
+PACK_LATEST_VERSION*)
+################
+case $lang in
+ru) echo -e "Пакет $FC_3$2$FC_0 имеет последнюю версию";;
+uk) echo -e "Пакет $FC_3$2$FC_0 має останню версію";;
+*)  echo -e "The pack $FC_3$2$FC_0 has the latest version";;
+esac
+;;
+
+################
+FILE_NOT_FOUND*)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Файл $FC_2$2$FC_0 не найден";;
+uk) echo -e "$FC_2Помилка:$FC_0 Файл $FC_2$2$FC_0 не знайдено";;
+*)  echo -e "$FC_2ERROR:$FC_0 File $FC_2$2$FC_0 not found";;
+esac
+;;
+
+################
+NULL_URL_AUR*)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Пустой url AUR для пакета $FC_2$2$FC_0";;
+uk) echo -e "$FC_2Помилка:$FC_0 Порожній url AUR для пакета $FC_2$2$FC_0";;
+*)  echo -e "$FC_2ERROR:$FC_0 A null url AUR  for the package $FC_2$2$FC_0";;
+esac
+;;
+
+################
+USER_NOT_EXIST*)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Пользователь $FC_2$2$FC_0 не существует";;
+uk) echo -e "$FC_2Помилка:$FC_0 Користувач $FC_2$2$FC_0 не існує";;
+*)  echo -e "$FC_2ERROR:$FC_0 The user $FC_2$2$FC_0 does not exist";;
+esac
+;;
+
+################
+SKIPPED_PACKAGE_ANY*)
+################
+case $lang in
+ru) echo -e "Пропущен пакет $2. Aрхитектура 'any' собирается под $3";;
+uk) echo -e "Пропущен пакет $2. Архітектура 'any' збирається під $3";;
+*)  echo -e "Missed package of $2. Architecture 'any' to build $3";;
+esac
+;;
+
+################
+FAILED_BUILD_PACKAGE*)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось собрать пакет $FC_2$2$FC_0";;
+uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося зібрати пакет $FC_2$2$FC_0";;
+*)  echo -e "$FC_2ERROR:$FC_0 Failed to build the package $FC_2$2$FC_0";;
+esac
+;;
+
+################
+FAILED_UPDATE)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось обновить систему";;
+uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося оновити систему";;
+*)  echo -e "$FC_2ERROR:$FC_0 Failed to update the system";;
+esac
+;;
+
+################
+FAILED_REMOVE_PACKAGE*)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось удалить пакет $2 из репозитория !!!";;
+uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося видалити пакет $2 з репозиторію !!!";;
+*)  echo -e "$FC_2ERROR:$FC_0 Failed to remove package $2 repository !!!";;
+esac
+;;
+
+################
+FAILED_ADD_PACKAGE*)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось добавить пакет $2 в репозитория !!!";;
+uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося додати пакет $2 до репозиторію !!!";;
+*)  echo -e "$FC_2ERROR:$FC_0 Failed to append package $2 repository !!!";;
+esac
+;;
+
+################
+ARCH_NOT_SUPPORTED*)
+################
+case $lang in
+ru) echo -e "$FC_2Ошибка:$FC_0 Текущая архитектура пакетом $2 не поддерживается  !!!";;
+uk) echo -e "$FC_2Помилка:$FC_0 Поточна архітектура пакетом $2 не підтримується !!!";;
+*)  echo -e "$FC_2ERROR:$FC_0 The current architecture of the package $2 not supported !!!";;
+esac
+;;
+
+*)
+echo -e "Unknown string $1";
+exit 1
+;;
+esac
+}

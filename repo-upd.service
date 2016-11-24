@@ -1,0 +1,5 @@
+[Unit]
+Description=Startup script repo-upd
+
+[Service]
+ExecStart=/usr/bin/repo-upd -m

@@ -1,0 +1,360 @@
+lang=`echo $LANG | cut -b 1,2`
+
+show_message() {
+case $1 in
+##############
+SHOW_USAGE)############################################################
+##############
+case $lang in
+ru)
+cat <<EOFUSAGE
+repo-upd - Скрипт для проверки обновлений локального и AUR репозиториев.
+
+Используются следующие опции командной строки:
+				
+ -b : (auto build) Автоматически собирать пакеты.
+				
+ -a : (all build) Пересобрать все пакеты в репозитории.
+				
+ -e : (e-mail) Отправить сообщение на электронную почту (используется smail).
+				
+ -f : (from address) Использовать адрес для отправки.
+				
+ -t : (to address) Адрес получателя.
+				
+ -m : (mail file) Файл сообщения.
+				
+ -s : (subject) Тема сообщения.
+				
+ -r : (from) Текстовое представление от кого.
+      Если не указано, будет использоваться from address.
+				
+ -v --version : Версия скрипта.
+				
+ -h --help: Показать справку и выйти.
+				
+Пример: repo-upd -e -f=test@ukr.net -t=test2@ukr.net -m=~/mailfile -d -s=Test!!! -r=Admin test@ukr.net
+
+EOFUSAGE
+;;
+
+uk)
+cat <<EOFUSAGE
+repo-upd - Скрипт для перевірки оновлень локального і AUR репозиторіїв.
+
+Використовуються наступні опції командного рядка:
+				
+ -b : (auto build) Автоматично збирати пакети.
+				
+ -a : (all build) Зібрати всі пакети в репозиторії.
+				
+ -e : (e-mail) Відправити повідомлення на електронну пошту (використовується smail).
+				
+ -f : (from address) Використовувати адреса для надсилання.
+				
+ -t : (to address) Адреса одержувача.
+				
+ -m : (mail file) Файл повідомлення.
+				
+ -s : (subject) Тема повідомлення.
+				
+ -r : (from) Текстове представлення від кого.
+      Якщо не вказано, буде використовуватися from address.
+				
+ -v --version : Версія скрипта.
+				
+ -h --help : Показати довідку і вийти.
+				
+Приклад: repo-upd -e -f=test@ukr.net -t=test2@ukr.net -m=~/mailfile -d -s=Test!!! -r=Admin test@ukr.net
+
+EOFUSAGE
+;;
+
+*)
+cat << EOFUSAGE
+repo-upd - Script to check for updates local and AUR repositories.
+
+Use the following command line options:
+				
+ -b : (auto build) Automatically build packages.
+				
+ -a : (all build) To rebuild all packages in the repository.
+				
+ -e : (e-mail) To send a message by e-mail (used is smail).
+				
+ -f : (from address) Use the address to send.
+				
+ -t : (to address) The recipient's address.
+				
+ -m : (mail file) File messages.
+				
+ -s : (subject) Subject message.
+				
+ -r : (from) Text representation from anyone.
+      If not specified, will use the from address.
+				
+ -v --version : Version of the script.
+				
+ -h --help : Show help and exit.
+				
+Example: repo-upd -e -f=test@ukr.net -t=test2@ukr.net -m=~/mailfile -d -s=Test!!! -r=Admin test@ukr.net
+
+EOFUSAGE
+;;
+esac
+;;
+
+#############
+CURRENT_VERSION)
+#############
+case $lang in
+ru) echo -e "Версия скрипта ${CURRENT_VERSION}"
+;;
+uk) echo -e "Версія скрипта ${CURRENT_VERSION}"
+;;
+*)  echo -e "Script version ${CURRENT_VERSION}"
+esac
+;;
+
+################
+FILE_NOT_FOUND*)#######################################################
+################
+case $lang in
+ru) echo -e "Файл "$2" не найден";;
+uk) echo -e "Файл "$2" не знайдено";;
+*)  echo -e "File "$2" not found";;
+esac
+;;
+
+###############
+UNKNOWN_ARG*)##########################################################
+###############
+case $lang in
+ru) echo -e "Неизвестный аргумент $2";;
+uk) echo -e "Невідомий аргумент $2";;
+*)  echo -e "Unknown argement $2";;
+esac
+;;
+
+###############
+VAR_NOT_SET*)##########################################################
+###############
+case $lang in
+ru) echo -e "Переменная "$2" не установлена";;
+uk) echo -e "Змінна "$2" не встановлена";;
+*)  echo -e "Variable "$2" not set";;
+esac;;
+
+################
+RUN_ROOT_NOT_PERMITTED*)##########################################################
+################
+case $lang in
+ru) echo -e "Запуск $2 от имени суперпользователя не разрешён";;
+uk) echo -e "Запуск $2 від імені суперкористувача не дозволений";;
+*)  echo -e "Run $2 as root is not permitted";;
+esac;;
+
+###########
+NO_ARCHIVE*)##############################################################
+###########
+case $lang in
+ru) echo -e "$2 не является архивом";;
+uk) echo -e "$2 не є архівом";;
+*)  echo -e "$2 is not an archive";;
+esac;;
+
+###########
+WORK_DIR*)##############################################################
+###########
+case $lang in
+ru) echo -e "Изменение рабочей директории на $2";;
+uk) echo -e "Зміна робочої директорії на $2";;
+*)  echo -e "Changing working dir to $2";;
+esac;;
+
+###########
+BT_DIR_NOT_WRITABLE)##############################################################
+###########
+case $lang in
+ru) echo -e "Временная директория $2 не доступна для записи";;
+uk) echo -e "Тимчасова директорія $2 не доступна для запису";;
+*)  echo -e "Temp directory $2 is not writable";;
+esac;;
+
+############
+YES_OR_NO)##############################################################i
+###########
+case $lang in
+ru) echo -e "Введите \"yes\" или \"no\"";;
+uk) echo -e "Введіть \"yes\" или \"no\"";;
+*)  echo -e "Please enter \"yes\" or \"no\"";;
+esac;;
+
+##########
+WRITING_TO*)##############################################################i
+############
+case $lang in
+ru) echo -e "Файл записан в директорию $2";;
+uk) echo -e "Файл записаний в директорію $2";;
+*)  echo -e "File be written in $2";;
+esac;;
+
+##########
+OVERWRITE_FILE*)###################################################
+############
+case $lang in
+ru) echo -e "Перезаписать файл $2?";;
+uk) echo -e "Перезаписати файл $2?";;
+*)  echo -e "Overwrite the file $2?";;
+esac;;
+
+##########
+FAILED_TO_CREATE_DIR*)###################################################
+############
+case $lang in
+ru) echo -e "Не удалось создать каталог \e[31m$2\e[0m";;
+uk) echo -e "Не вдалося створити каталог \e[31m$2\e[0m";;
+*)  echo -e "Failed to create directory \e[31m$2\e[0m";;
+esac;;
+
+##########
+UNABLE_CONNECT_SERVER*)###################################################
+############
+case $lang in
+ru) echo -e "\e[31mНе удается подключиться к серверу: $2\e[0m";;
+uk) echo -e "\e[31mНе вдається підключитися до сервера: $2\e[0m";;
+*)  echo -e "\e[31mUnable to connect to server: $2\e[0m";;
+esac;;
+
+##########
+NOT_FOUND_CONFIG*)###################################################
+############
+case $lang in
+ru) echo -e "Не найден конфигурационный файл \e[31m$2\e[0m";;
+uk) echo -e "Не знайдено конфігураційний файл \e[31m$2\e[0m";;
+*)  echo -e "Not found config file \e[31m$2\e[0m";;
+esac;;
+
+##########
+NOT_SPECIFIED_PARAMETER*)###################################################
+############
+case $lang in
+ru) echo -e "Не указан параметр \e[31m$2\e[0m";;
+uk) echo -e "Не вказано параметр \e[31m$2\e[0m";;
+*)  echo -e "Not specified parameter \e[31m$2\e[0m";;
+esac;;
+
+##########
+CANNOT_FIND_MAIL_FILE*)###################################################
+############
+case $lang in
+ru) echo -e "Не найден текстовый файл для отправки \e[31m$2\e[0m";;
+uk) echo -e "Не знайдено текстовий файл для відправки \e[31m$2\e[0m";;
+*)  echo -e "Not found text file to send \e[31m$2\e[0m";;
+esac;;
+
+#############
+NOT_CORRECTLY_EMAIL*)
+#############
+case $lang in
+ru) echo -e "Не верно введен электронный адрес \e[31m$2\e[0m"
+;;
+uk) echo -e "Не вірно уведено електронну адресу \e[31m$2\e[0m"
+;;
+*)  echo -e "Not correctly entered email address \e[31m$2\e[0m"
+esac
+;;
+
+#############
+DIRECTORY_NOT_FOUND*)
+#############
+case $lang in
+ru) echo -e "Каталог \e[31m$2\e[0m не найден"
+;;
+uk) echo -e "Каталог \e[31m$2\e[0m не знайдено"
+;;
+*)  echo -e "Directory \e[31m$2\e[0m not found"
+esac
+;;
+
+#############
+PACKAGE_NOT_FOUND_AUR*)
+#############
+case $lang in
+ru) echo -e "Пакет $2 не найден в AUR"
+;;
+uk) echo -e "Пакет $2 не знайдено в AUR"
+;;
+*)  echo -e "Package $2 not found in the AUR"
+esac
+;;
+
+#############
+VERSION_PACKAGE_DIFFERENT*)
+#############
+case $lang in
+ru) echo -e "Версия пакета $2 отличается:"
+;;
+uk) echo -e "Версія пакета $2 відрізняється:"
+;;
+*)  echo -e "The package $2 version is different:"
+esac
+;;
+
+#############
+IN_AUR_REPOSITORY*)
+#############
+case $lang in
+ru) echo -e "- в репозитории AUR $2"
+;;
+uk) echo -e "- у репозитарію AUR $2"
+;;
+*)  echo -e "- in AUR repository $2"
+esac
+;;
+
+#############
+IN_LOCAL_REPOSITORY*)
+#############
+case $lang in
+ru) echo -e "- в локальном репозитории $2"
+;;
+uk) echo -e "- у локальному репозитарію $2"
+;;
+*)  echo -e "- In the local repository $2"
+esac
+;;
+
+################
+I_M_NOT_ROOT)
+################
+case $lang in
+ru) echo -e "Необходимы права суперпользователя root";;
+uk) echo -e "Необхідні права суперкористувача root";;
+*)  echo -e "You need to be root";;
+esac;;
+
+################
+FAILED_BUILD_PACKAGE*)
+################
+case $lang in
+ru) echo -e "Не удалось собрать пакет $2";;
+uk) echo -e "Не вдалося зібрати пакет $2";;
+*)  echo -e "Failed to build the package $2";;
+esac;;
+
+################
+SUCCESSFULLY_BUILD_PACKAGE*)
+################
+case $lang in
+ru) echo -e "Пакет $2 для архитектуры $3 успешно собран";;
+uk) echo -e "Пакет $2 для архітектури $3 успішно зібраний";;
+*)  echo -e "Package $2 for architecture $3 successfully assembled";;
+esac;;
+
+*)
+echo -e "Unknown string $1";
+exit 1
+;;
+esac
+}

@@ -1,0 +1,368 @@
+#! /bin/bash
+
+CURRENT_VERSION=0.0.0
+INSTALL_PREFIX=/usr
+PO_DIR=${INSTALL_PREFIX}/share/repotools
+CONFIG_FILE=/etc/repotools.conf
+BASE_NAME=`basename "$0"`
+REAL_ARCH=$(uname -m)
+
+#Loading message file
+if [ -f "${PO_DIR}/$BASE_NAME.messages" ]; then
+   . "${PO_DIR}/$BASE_NAME.messages"
+else
+  case $lang in
+       ru) echo -e "\e[31mОшибка:\e[0m не найден файл $BASE_NAME.messages в '${PO_DIR}'!!!";;
+       uk) echo -e "\e[31mПомилка:\e[0m не знайдений файл $BASE_NAME.messages у '${PO_DIR}'!!!";;
+       *)  echo -e "\e[31mError:\e[0m file $BASE_NAME.messages not found in '${PO_DIR}'!!!";;
+  esac
+  exit 1
+fi
+
+if ! [ -f $CONFIG_FILE ]; then
+   show_message NOT_FOUND_CONFIG $CONFIG_FILE
+   exit 1
+else
+   . "$CONFIG_FILE"
+fi
+
+#========================
+check_repotoolsconf(){
+  if [ -z "$DEFAULT_USER_REPO" ]; then
+     show_message VAR_NOT_SET "DEFAULT_USER_REPO"
+     exit 1
+  else
+     id -un "$DEFAULT_USER_REPO" 2>/dev/null 1>/dev/null
+     if [ "$?" = 1 ]; then
+        show_message USER_NOT_EXIST "$DEFAULT_USER_REPO"
+        exit 1
+     fi
+  fi
+  if [ -z "$REPO_PKG_DIR" ]; then
+      show_message VAR_NOT_SET "REPO_PKG_DIR"
+      exit 1
+  fi
+  if [ -z "$LIST_ARCH" ]; then
+     show_message VAR_NOT_SET "LIST_ARCH"
+     exit 1
+  else
+     for i in $LIST_ARCH; do
+         if ! [ -d "$REPO_PKG_DIR/$i" ]; then
+            show_message DIRECTORY_NOT_FOUND "$REPO_PKG_DIR/$i"
+            exit 1
+         fi
+     done
+  fi
+  if [ -n "$PKG_BUILD" ]; then
+     if [ -z "$ARCH_BUILD_ANY" ]; then
+        show_message VAR_NOT_SET "ARCH_BUILD_ANY"
+        exit 1
+     fi
+  fi
+  if ! [ -d "$REPO_PKG_DIR" ]; then
+     show_message DIRECTORY_NOT_FOUND "$REPO_PKG_DIR"
+     exit 1
+  fi
+}
+
+#========================
+grep_function() {
+  { declare -f "$1" || declare -f package; } 2>/dev/null | grep -E "$2"
+}
+
+#========================
+extract_function_variable() {
+  # $1: function name
+  # $2: variable name
+  # $3: multivalued
+  # $4: name of output var
+
+  local funcname=$1 attr=$2 isarray=$3 outputvar=$4 attr_regex= decl= r=1
+
+  if (( isarray )); then
+     printf -v attr_regex '^[[:space:]]* %s\+?=\(' "$2"
+  else
+    printf -v attr_regex '^[[:space:]]* %s\+?=[^(]' "$2"
+  fi
+
+  while read -r; do
+     # strip leading whitespace and any usage of declare
+     decl=${REPLY##*([[:space:]])}
+     eval "${decl/#$attr/$outputvar}"
+     # entering this loop at all means we found a match, so notify the caller.
+     r=0
+   done < <(grep_function "$funcname" "$attr_regex")
+
+  return $r
+}
+
+#========================
+del_pkg_arch() {
+  local PKG_NAME PKG_ARCH
+
+  PKG_NAME=$1
+  PKG_ARCH=(`echo "$2"`)
+  if [[ "${PKG_ARCH}" = "any" ]]; then
+     for a in $LIST_ARCH; do
+         cd "${REPO_PKG_DIR}/$a"
+         filepkg=`find .  -name "$PKG_NAME-*-$a.pkg.tar.xz" -type f`
+         if ! [ -f "$filepkg" ]; then
+            continue
+         fi
+         repo-remove "snuglinux-core.db.tar.gz" "$PKG_NAME"
+         if [ "$?" = 1 ]; then
+            show_message FAILED_REMOVE_PACKAGE $PKG_NAME
+            exit 1
+         fi
+         rm -f "$filepkg"
+#         find . -type f -o -type l -name "$PKG_NAME-*-$a.pkg.tar.xz" -delete
+     done
+  else
+     for a in ${PKG_ARCH[@]}; do
+         cd "${REPO_PKG_DIR}/$a"
+         filepkg=`find .  -name "$PKG_NAME-*-$a.pkg.tar.xz" -type f`
+         if ! [ -f "$filepkg" ]; then
+            continue
+         fi
+         repo-remove "snuglinux-core.db.tar.gz" "$PKG_NAME"
+         if [ "$?" = 1 ]; then
+            show_message FAILED_REMOVE_PACKAGE $filepkg
+            exit 1
+         fi
+         rm -f "$filepkg"
+#         find . -type f -o -type l -name "$PKG_NAME-*-$a.pkg.tar.xz" -delete
+      done
+  fi
+}
+
+#========================
+del_pkg(){
+  local PKG_NAME PKG_ARCH
+
+  cd "${REPO_DIR}"
+  check_repotoolsconf
+  if ! [ -f ${REPO_DIR}/${PKG_DEL}/PKGBUILD ]; then
+      FILE_NOT_FOUND ${REPO_DIR}/${PKG_DEL}/PKGBUILD
+      exit 1
+  else
+     source ${REPO_DIR}/${PKG_DEL}/PKGBUILD
+     PKG_NAME=(${pkgname[@]})
+     PKG_ARCH=(${arch[@]})
+  fi
+  if [ -n "${REPO_CONF}" ]; then
+     if [ -f ${REPO_CONF} ]; then
+        source ${REPO_CONF}
+     fi
+     for i in ${NOT_HANDLE}; do
+         if [ "$i" ==  "${PKG_DEL}" ]; then
+            show_message PACKAGE_LIST_EXCEPTION "$i"
+            exit 1
+         fi
+     done
+  fi
+  if [ ${#PKG_NAME[@]} -gt 1 ]; then
+     for name in "${PKG_NAME[@]}"; do
+         if extract_function_variable "package_$name" arch 1 list; then
+            del_pkg_arch ${name} "`echo ${arch[*]}`"
+         else
+            del_pkg_arch ${name} "`echo ${PKG_ARCH[@]}`"
+         fi
+     done
+  else
+     del_pkg_arch ${PKG_NAME} "`echo ${PKG_ARCH[@]}`"
+  fi
+}
+
+#========================
+add_pkg_arch() {
+  local PKG_NAME PKG_ARCH
+
+  PKG_NAME=$1
+  PKG_ARCH=(`echo "$2"`)
+  if [[ "${PKG_ARCH}" = "any" ]]; then
+     filepkg=`find . -name "$PKG_NAME-*-any.pkg.tar.xz" -type f`
+     if ! [ -f "$filepkg" ]; then
+        show_message FILE_NOT_FOUND "$PKG_NAME-*-any.pkg.tar.xz"
+        exit 1
+     fi
+     #find "${REPO_PKG_DIR}/any" -type f -o -type l -name "$PKG_NAME-*-any.pkg.tar.xz" -delete
+     mv "$filepkg" "$REPO_PKG_DIR/any"
+     cd "${REPO_PKG_DIR}/any"
+     repo-add "snuglinux-core.db.tar.gz" "$filepkg" -R
+     for a in $LIST_ARCH; do
+         if [ "$a" != "any" ]; then
+            cd "$REPO_PKG_DIR/$a"
+            #find "$REPO_PKG_DIR/$a" -type f -o -type l -name "$PKG_NAME-*-$a.pkg.tar.xz" -delete
+            ln -s  "$REPO_PKG_DIR/any/$filepkg" "$REPO_PKG_DIR/$a/$filepkg"
+            repo-add "snuglinux-core.db.tar.gz" "$filepkg" -R
+            if [ "$?" = 1 ]; then
+               show_message FAILED_REMOVE_PACKAGE $PKG_NAME
+               exit 1
+            fi
+         fi
+     done
+  else
+     filepkg=`find . -name "$PKG_NAME-*-$REAL_ARCH.pkg.tar.xz" -type f`
+     if ! [ -f "$filepkg" ]; then
+        show_message FILE_NOT_FOUND "$PKG_NAME-*-$REAL_ARCH.pkg.tar.xz"
+        exit 1
+     fi
+     #find "${REPO_PKG_DIR}/$REAL_ARCH" -type f -name "$PKG_NAME-*-$REAL_ARCH.pkg.tar.xz" -delete
+     mv "$filepkg" "$REPO_PKG_DIR/$REAL_ARCH"
+     cd "${REPO_PKG_DIR}/$REAL_ARCH"
+     repo-add "snuglinux-core.db.tar.gz" "$filepkg"
+     if [ "$?" = 1 ]; then
+        show_message FAILED_REMOVE_PACKAGE $filepkg
+        exit 1
+     fi
+  fi
+  cd "${REPO_DIR}/$PKG_BUILD"
+}
+
+#========================
+add_pkg() {
+  local PKG_NAME PKG_ARCH
+
+  cd "${REPO_DIR}"
+  sudo pacman -Syu --noconfirm
+  if [ "$?" = 1 ]; then
+      show_message FAILED_UPDATE
+      exit 1
+  fi
+  check_repotoolsconf
+  if ! [ -f ${REPO_DIR}/${PKG_BUILD}/PKGBUILD ]; then
+     show_message FILE_NOT_FOUND ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
+     exit 1
+  else
+     source ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
+     PKG_NAME=(${pkgname[@]})
+     PKG_ARCH=(${arch[@]})
+  fi
+  if [ -n "$REPO_CONF" ]; then
+     if [ -f $REPO_CONF ]; then
+        source $REPO_CONF
+     fi
+     for i in $NOT_HANDLE; do
+         if [ "$i" ==  "$PKG_BUILD" ]; then
+            show_message PACKAGE_LIST_EXCEPTION "$i"
+            exit 1
+         fi
+     done
+     not_update_aur=0
+     for i in $NOT_UPDATE_AUR; do
+         if [ "$i" ==  "$PKG_BUILD" ]; then
+            not_update_aur=1
+            break
+         fi
+     done
+  fi
+  if [[ "${PKG_ARCH}" = "any" ]]; then
+     if [[ $ARCH_BUILD_ANY != $REAL_ARCH ]]; then
+        show_message SKIPPED_PACKAGE_ANY "$PKG_BUILD" "$ARCH_BUILD_ANY"
+        exit 0
+     fi
+  fi
+  if [ $not_update_aur -eq 1 ]; then
+     if ! [ -f ${REPO_DIR}/$PKG_BUILD/PKGBUILD ]; then
+        FILE_NOT_FOUND ${REPO_DIR}/$PKG_BUILD/PKGBUILD
+        exit 1
+     fi
+  else
+     PKG_URL=`package-query --aur-url https://aur.archlinux.org -Aif %u $PKG_BUILD`
+     if [[ ! -n "$PKG_URL" ]]; then
+        show_message NULL_URL_AUR "$PKG_BUILD"
+        exit 1
+     fi
+     if [ -d "$PKG_BUILD" ]; then
+        tar -zcvf "$PKG_BUILD"-backup.tar.gz "$PKG_BUILD"
+        rm -Rf "${REPO_DIR}/$PKG_BUILD"
+     fi
+     curl -fs "$PKG_URL" -o "$PKG_BUILD".tar.gz
+     bsdtar --strip-components 0 -xvf $PKG_BUILD.tar.gz
+     rm "$PKG_BUILD".tar.gz
+     if [[ "${PKG_ARCH}" != "any" ]]; then
+        find_arch=0
+        for a in "${PKG_ARCH[@]}"; do
+            if [ "$a" = "$REAL_ARCH" ]; then
+               find_arch=1
+               break
+            fi
+        done
+     fi
+     if [ $find_arch -eq 0 ]; then
+        show_message ARCH_NOT_SUPPORTED $PKG_BUILD
+        exit 1
+     fi
+  fi
+
+  cd "${REPO_DIR}/$PKG_BUILD"
+  makepkg -scf --noconfirm
+  if [ "$?" = 1 ]; then
+     if ! [ -f "${REPO_DIR}/$PKG_BUILD"-backup.tar.gz ]; then
+        cd "${REPO_DIR}"
+        rm -R "${REPO_DIR}/$PKG_BUILD"
+        bsdtar --strip-components 0 -xvf "$PKG_BUILD"-backup.tar.gz
+        show_message FAILED_BUILD_PACKAGE $PKG_BUILD
+        exit 1
+     fi
+  fi
+  for name in "${PKG_NAME[@]}"; do
+      if extract_function_variable "package_$name" arch 1 list; then
+         add_pkg_arch ${name} "`echo ${arch[*]}`"
+      else
+         add_pkg_arch ${name} "`echo ${PKG_ARCH[@]}`"
+      fi
+   done
+}
+
+#========================
+set_options(){
+  while [ ! -z "$1" ]; do
+        case $1 in
+                 -p=*)
+                    PKG_BUILD=$(echo "$1" | sed 's/-p=//')
+                    add_pkg
+                    exit 0
+                    ;;
+                 -d=*)
+                    PKG_DEL=$(echo "$1" | sed 's/-d=//')
+                    del_pkg
+                    exit 0
+                    ;;
+                 -v)
+                    show_message CURRENT_VERSION
+                    exit 0
+                    ;;
+                 -h|--help)
+                    show_message SHOW_USAGE
+                    exit 0
+                    ;;
+                 *) show_message UNKNOWN_ARG $1
+                    exit 1
+                    ;;
+        esac
+        shift
+  done
+  if [ "$PKG_DEL" == ""  -a  "$PKG_BUILD" == "" ]; then
+     show_message NOT_SPECIFIED_PARAMETER "-p -d (package name)"
+     exit 1
+  fi
+}
+
+if [[ $EUID -eq 0 ]]; then
+   show_message RUN_ROOT_NOT_PERMITTED $BASE_NAME
+   exit 1
+fi
+
+if [ ! -d "${REPO_DIR}" ]; then
+   show_message DIRECTORY_NOT_FOUND "$REPO_DIR"
+   exit 1
+fi
+
+#if [[ ! -n $PACMAN_CONF ]]; then
+#   show_message NOT_FOUND_CONFIG $PACMAN_CONF
+#  exit
+#fi
+
+set_options $*
+
