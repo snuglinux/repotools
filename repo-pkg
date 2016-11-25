@@ -63,6 +63,14 @@ check_repotoolsconf(){
      show_message DIRECTORY_NOT_FOUND "$REPO_PKG_DIR"
      exit 1
   fi
+  if [ -n "$REPO_BACKUP_DIR" ]; then
+     if ! [ -d $REPO_BACKUP_DIR ]; then
+        mkdir $REPO_BACKUP_DIR
+     fi
+  else
+     show_message VAR_NOT_SET "REPO_BACKUP_DIR"
+     exit 1
+  fi
 }
 
 #========================
@@ -142,7 +150,7 @@ del_pkg(){
   cd "${REPO_DIR}"
   check_repotoolsconf
   if ! [ -f ${REPO_DIR}/${PKG_DEL}/PKGBUILD ]; then
-      FILE_NOT_FOUND ${REPO_DIR}/${PKG_DEL}/PKGBUILD
+      show_message FILE_NOT_FOUND ${REPO_DIR}/${PKG_DEL}/PKGBUILD
       exit 1
   else
      source ${REPO_DIR}/${PKG_DEL}/PKGBUILD
@@ -180,19 +188,19 @@ add_pkg_arch() {
   PKG_NAME=$1
   PKG_ARCH=(`echo "$2"`)
   if [[ "${PKG_ARCH}" = "any" ]]; then
-     filepkg=`find . -name "$PKG_NAME-*-any.pkg.tar.xz" -type f`
+     filepkg=`find . -name "$PKG_NAME-$PKG_VER-$PKG_REL-any.pkg.tar.xz" -type f`
      if ! [ -f "$filepkg" ]; then
-        show_message FILE_NOT_FOUND "$PKG_NAME-*-any.pkg.tar.xz"
+        show_message FILE_NOT_FOUND "$PKG_NAME-$PKG_VER-$PKG_REL-any.pkg.tar.xz"
         exit 1
      fi
-     #find "${REPO_PKG_DIR}/any" -type f -o -type l -name "$PKG_NAME-*-any.pkg.tar.xz" -delete
+     #find "${REPO_PKG_DIR}/any" -type f -o -type l -name "$PKG_NAME-$PKG_VER-$PKG_REL-any.pkg.tar.xz" -delete
      mv "$filepkg" "$REPO_PKG_DIR/any"
      cd "${REPO_PKG_DIR}/any"
      repo-add "snuglinux-core.db.tar.gz" "$filepkg" -R
      for a in $LIST_ARCH; do
          if [ "$a" != "any" ]; then
             cd "$REPO_PKG_DIR/$a"
-            #find "$REPO_PKG_DIR/$a" -type f -o -type l -name "$PKG_NAME-*-$a.pkg.tar.xz" -delete
+            #find "$REPO_PKG_DIR/$a" -type f -o -type l -name "$PKG_NAME-$PKG_VER-$PKG_REL-$a.pkg.tar.xz" -delete
             ln -s  "$REPO_PKG_DIR/any/$filepkg" "$REPO_PKG_DIR/$a/$filepkg"
             repo-add "snuglinux-core.db.tar.gz" "$filepkg" -R
             if [ "$?" = 1 ]; then
@@ -202,12 +210,12 @@ add_pkg_arch() {
          fi
      done
   else
-     filepkg=`find . -name "$PKG_NAME-*-$REAL_ARCH.pkg.tar.xz" -type f`
+     filepkg=`find . -name "$PKG_NAME-$PKG_VER-$PKG_REL-$REAL_ARCH.pkg.tar.xz" -type f`
      if ! [ -f "$filepkg" ]; then
-        show_message FILE_NOT_FOUND "$PKG_NAME-*-$REAL_ARCH.pkg.tar.xz"
+        show_message FILE_NOT_FOUND "$PKG_NAME-$PKG_VER-$PKG_REL-$REAL_ARCH.pkg.tar.xz"
         exit 1
      fi
-     #find "${REPO_PKG_DIR}/$REAL_ARCH" -type f -name "$PKG_NAME-*-$REAL_ARCH.pkg.tar.xz" -delete
+     #find "${REPO_PKG_DIR}/$REAL_ARCH" -type f -name "$PKG_NAME-$PKG_VER-$PKG_REL-$REAL_ARCH.pkg.tar.xz" -delete
      mv "$filepkg" "$REPO_PKG_DIR/$REAL_ARCH"
      cd "${REPO_PKG_DIR}/$REAL_ARCH"
      repo-add "snuglinux-core.db.tar.gz" "$filepkg"
@@ -230,14 +238,6 @@ add_pkg() {
       exit 1
   fi
   check_repotoolsconf
-  if ! [ -f ${REPO_DIR}/${PKG_BUILD}/PKGBUILD ]; then
-     show_message FILE_NOT_FOUND ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
-     exit 1
-  else
-     source ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
-     PKG_NAME=(${pkgname[@]})
-     PKG_ARCH=(${arch[@]})
-  fi
   if [ -n "$REPO_CONF" ]; then
      if [ -f $REPO_CONF ]; then
         source $REPO_CONF
@@ -256,15 +256,9 @@ add_pkg() {
          fi
      done
   fi
-  if [[ "${PKG_ARCH}" = "any" ]]; then
-     if [[ $ARCH_BUILD_ANY != $REAL_ARCH ]]; then
-        show_message SKIPPED_PACKAGE_ANY "$PKG_BUILD" "$ARCH_BUILD_ANY"
-        exit 0
-     fi
-  fi
   if [ $not_update_aur -eq 1 ]; then
      if ! [ -f ${REPO_DIR}/$PKG_BUILD/PKGBUILD ]; then
-        FILE_NOT_FOUND ${REPO_DIR}/$PKG_BUILD/PKGBUILD
+        show_message FILE_NOT_FOUND ${REPO_DIR}/$PKG_BUILD/PKGBUILD
         exit 1
      fi
   else
@@ -275,11 +269,26 @@ add_pkg() {
      fi
      if [ -d "$PKG_BUILD" ]; then
         tar -zcvf "$PKG_BUILD"-backup.tar.gz "$PKG_BUILD"
+        mv -f "$PKG_BUILD"-backup.tar.gz $REPO_BACKUP_DIR
         rm -Rf "${REPO_DIR}/$PKG_BUILD"
      fi
      curl -fs "$PKG_URL" -o "$PKG_BUILD".tar.gz
      bsdtar --strip-components 0 -xvf $PKG_BUILD.tar.gz
      rm "$PKG_BUILD".tar.gz
+     if ! [ -f ${REPO_DIR}/${PKG_BUILD}/PKGBUILD ]; then
+        show_message FILE_NOT_FOUND ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
+        exit 0
+     else
+        source ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
+        PKG_NAME=(${pkgname[@]})
+        PKG_ARCH=(${arch[@]})
+     fi
+     if [[ "${PKG_ARCH}" = "any" ]]; then
+        if [[ $ARCH_BUILD_ANY != $REAL_ARCH ]]; then
+           show_message SKIPPED_PACKAGE_ANY "$PKG_BUILD" "$ARCH_BUILD_ANY"
+           exit 0
+        fi
+     fi
      if [[ "${PKG_ARCH}" != "any" ]]; then
         find_arch=0
         for a in "${PKG_ARCH[@]}"; do
@@ -296,12 +305,24 @@ add_pkg() {
   fi
 
   cd "${REPO_DIR}/$PKG_BUILD"
+  if ! [ -f ${REPO_DIR}/${PKG_BUILD}/PKGBUILD ]; then
+     show_message FILE_NOT_FOUND ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
+     exit 1
+  else
+     source ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
+     PKG_NAME=(${pkgname[@]})
+     PKG_VER=${pkgver}
+     PKG_ARCH=(${arch[@]})
+     PKG_REL=${pkgrel}
+  fi
   makepkg -scf --noconfirm
   if [ "$?" = 1 ]; then
-     if ! [ -f "${REPO_DIR}/$PKG_BUILD"-backup.tar.gz ]; then
+     if ! [ -f "$REPO_BACKUP_DIR/$PKG_BUILD"-backup.tar.gz ]; then
         cd "${REPO_DIR}"
         rm -R "${REPO_DIR}/$PKG_BUILD"
+        mv "$REPO_BACKUP_DIR/$PKG_BUILD"-backup.tar.gz .
         bsdtar --strip-components 0 -xvf "$PKG_BUILD"-backup.tar.gz
+        rm -f "$PKG_BUILD"-backup.tar.gz
         show_message FAILED_BUILD_PACKAGE $PKG_BUILD
         exit 1
      fi
@@ -312,7 +333,7 @@ add_pkg() {
       else
          add_pkg_arch ${name} "`echo ${PKG_ARCH[@]}`"
       fi
-   done
+  done
 }
 
 #========================

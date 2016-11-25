@@ -27,6 +27,8 @@ fi
 
 #========================
 set_options(){
+local AMSURE YN
+  YN="yesno"
   while [ ! -z "$1" ]; do
         case $1 in
                  -m)
@@ -36,6 +38,14 @@ set_options(){
                     AUTO_BUILD=1
                     ;;
                  -a)
+                   show_message UPDATE_ALL_PACKAGES_REPO
+                    while [ "$YN" = "${YN#*$AMSURE}" ] ; do
+                          show_message YES_OR_NO
+                          read AMSURE
+                    done
+                    if [ "$AMSURE" != "yes" ]; then
+                       exit 1
+                    fi
                     ALL_BUILD=1
                     AUTO_BUILD=1
                     ;;
@@ -176,29 +186,49 @@ mountchroot(){
 
 #========================
 pkgbuild(){
-
   if [[ $AUTO_BUILD -ne 1 ]]; then
      return
   fi
-  for i in $LIST_ARCH; do
-      if [ "$i" = "any" ]; then
+  for a in ${arch[@]}; do
+      if [[ "${a}" = "any" ]]; then
+         if [[ $ARCH_BUILD_ANY != $a ]]; then
+            continue
+         fi
+      fi
+      if ! echo "$LIST_ARCH" | grep -q $a ; then
          continue
-      elif [ "$i" = "i686" ]; then
-         linux32 chroot --userspec=pkg "$CHROOT_DIR/$i" repo-pkg -p=$pkgname
+      fi
+      if [[ "$a" = "i686" ]]; then
+         linux32 chroot --userspec=pkg "$CHROOT_DIR/$a" repo-pkg -p=$pkgname
       else
-         chroot --userspec=pkg "$CHROOT_DIR/$i" repo-pkg -p=$pkgname
+         chroot --userspec=pkg "$CHROOT_DIR/$a" repo-pkg -p=$pkgname
       fi
       if [ $? -ne 0 ]; then
          show_message FAILED_BUILD_PACKAGE $pkgname
          exit 1
       else
          if [[ $SEND_MAIL -eq 1 ]]; then
-            show_message SUCCESSFULLY_BUILD_PACKAGE "$pkgname" "$i" >> $MAIL_TEMP
+            show_message SUCCESSFULLY_BUILD_PACKAGE "$pkgname" "$a" >> $MAIL_TEMP
          else
-            show_message SUCCESSFULLY_BUILD_PACKAGE "$pkgname" "$i"
+            show_message SUCCESSFULLY_BUILD_PACKAGE "$pkgname" "$a"
          fi
       fi
    done
+}
+
+#========================
+edit_email_file(){
+  if [ -f $MAIL_TEMP ]; then
+    sed -i -e "s|\\\e\[0m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;30m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;31m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;32m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;33m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;34m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;35m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;36m||g" $MAIL_TEMP
+    sed -i -e "s|\\\e\[0;37m||g" $MAIL_TEMP
+  fi
 }
 
 if [[ $EUID -ne 0 ]]; then
@@ -210,15 +240,14 @@ fi
 #   show_message NOT_FOUND_CONFIG $PACMAN_CONF
 #  exit
 #fi
-
 set_options $*
-
-cd "${REPO_DIR}"
 if [ -n "$REPO_CONF" ]; then
    if [ -f $REPO_CONF ]; then
       source $REPO_CONF
    fi
 fi
+
+cd "${REPO_DIR}"
 for DIR in * ; do
     if ! [ -d $DIR ]; then
        continue
@@ -268,6 +297,7 @@ for DIR in * ; do
 done
 
 if [[ $SEND_MAIL -eq 1 ]]; then
+   edit_email_file
    if [ -f /bin/smail ]; then
       if [ -f $MAIL_TEMP ]; then
          smail -f=$FROM_ADDRESS -t=$TO_ADDRESS -m=$MAIL_TEMP -s=$SUBJECT_TEXT -r=$FROM_TEXT

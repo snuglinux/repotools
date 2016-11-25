@@ -75,11 +75,11 @@ esac
 CURRENT_VERSION)
 #############
 case $lang in
-ru) echo -e "Версия скрипта ${CURRENT_VERSION}"
+ru) echo -e "Версия скрипта ${FC_4}${CURRENT_VERSION}${FC_0}"
 ;;
-uk) echo -e "Версія скрипта ${CURRENT_VERSION}"
+uk) echo -e "Версія скрипта ${FC_4}${CURRENT_VERSION}${FC_0}"
 ;;
-*)  echo -e "Script version ${CURRENT_VERSION}"
+*)  echo -e "Script version ${FC_4}${CURRENT_VERSION}${FC_0}"
 esac
 ;;
 
@@ -87,9 +87,9 @@ esac
 FILE_NOT_FOUND*)#######################################################
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Файл $FC_3$2$FC_0 не найден";;
-uk) echo -e "$FC_2Помилка:$FC_0 Файл $FC_3$2$FC_0 не знайдено";;
-*)  echo -e "$FC_2ERROR:$FC_0 File $FC_3$2$FC_0 not found";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Файл ${FC_3}$2${FC_0} не найден";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Файл ${FC_3}$2${FC_0} не знайдено";;
+*)  echo -e "${FC_2}ERROR:${FC_0} File ${FC_3}$2${FC_0} not found";;
 esac
 ;;
 
@@ -97,9 +97,9 @@ esac
 UNKNOWN_ARG)##########################################################
 ###############
 case $lang in
-ru) echo -e "Неизвестный аргумент $FC_3$2$FC_0";;
-uk) echo -e "Невідомий аргумент $FC_3$2$FC_0";;
-*)  echo -e "Unknown argement $FC_3$2$FC_0";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Неизвестный аргумент ${FC_3}$2${FC_0}";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Невідомий аргумент ${FC_3}$2${FC_0}";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Unknown argement ${FC_3}$2${FC_0}";;
 esac
 ;;
 
@@ -107,110 +107,110 @@ esac
 VAR_NOT_SET*)##########################################################
 ###############
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Переменная $FC_3$2$FC_0 не установлена";;
-uk) echo -e "$FC_2Помилка:$FC_0 Змінна $FC_3$2$FC_0 не встановлена";;
-*)  echo -e "$FC_2ERROR:$FC_0 Variable $FC_3$2$FC_0 not set";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Переменная ${FC_3}$2${FC_0} не установлена";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Змінна ${FC_3}$2${FC_0} не встановлена";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Variable ${FC_3}$2${FC_0} not set";;
 esac;;
 
 ################
 RUN_ROOT_NOT_PERMITTED*)##########################################################
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Запуск $FC_3$2$FC_0 от имени суперпользователя не разрешён";;
-uk) echo -e "$FC_2Помилка:$FC_0 Запуск $FC_3$2$FC_0 від імені суперкористувача не дозволений";;
-*)  echo -e "$FC_2ERROR:$FC_0 Run $FC_3$2$FC_0 as root is not permitted";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Запуск ${FC_3}$2${FC_0} от имени суперпользователя не разрешён";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Запуск ${FC_3}$2${FC_0} від імені суперкористувача не дозволений";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Run ${FC_3}$2${FC_0} as root is not permitted";;
 esac;;
 
 ###########
 NO_ARCHIVE)##############################################################
 ###########
 case $lang in
-ru) echo -e "$FC_3$2$FC_0 не является архивом";;
-uk) echo -e "$FC_3$2$FC_0 не є архівом";;
-*)  echo -e "$FC_3$2$FC_0 is not an archive";;
+ru) echo -e "${FC_3}$2${FC_0} не является архивом";;
+uk) echo -e "${FC_3}$2${FC_0} не є архівом";;
+*)  echo -e "${FC_3}$2${FC_0} is not an archive";;
 esac;;
 
 ###########
 WORK_DIR)##############################################################
 ###########
 case $lang in
-ru) echo -e "Изменение рабочей директории на $FC_3$2$FC_0";;
-uk) echo -e "Зміна робочої директорії на $FC_3$2$FC_0";;
-*)  echo -e "Changing working dir to $FC_3$2$FC_0";;
+ru) echo -e "Изменение рабочей директории на ${FC_3}$2${FC_0}";;
+uk) echo -e "Зміна робочої директорії на ${FC_3}$2${FC_0}";;
+*)  echo -e "Changing working dir to ${FC_3}$2${FC_0}";;
 esac;;
 
 ###########
 BT_DIR_NOT_WRITABLE)##############################################################
 ###########
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Временная директория $FC_3$2$FC_0 не доступна для записи";;
-uk) echo -e "$FC_2Помилка:$FC_0 Тимчасова директорія $FC_3$2$FC_0 не доступна для запису";;
-*)  echo -e "$FC_2ERROR:$FC_0 Temp directory $FC_3$2$FC_0 is not writable";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Временная директория ${FC_3}$2${FC_0} не доступна для записи";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Тимчасова директорія ${FC_3}$2${FC_0} не доступна для запису";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Temp directory ${FC_3}$2${FC_0} is not writable";;
 esac;;
 
 ############
 YES_OR_NO)##############################################################i
 ###########
 case $lang in
-ru) echo -e "Введите $FC_3yes$FC_0 или $FC_3no$FC_0";;
-uk) echo -e "Введіть $FC_3yes$FC_0 или $FC_3no$FC_0";;
-*)  echo -e "Please enter $FC_3yes$FC_0 or $FC_3no$FC_0";;
+ru) echo -e "Введите ${FC_3}yes${FC_0} или ${FC_3}no${FC_0}";;
+uk) echo -e "Введіть ${FC_3}yes${FC_0} или ${FC_3}no${FC_0}";;
+*)  echo -e "Please enter ${FC_3}yes${FC_0} or ${FC_3}no${FC_0}";;
 esac;;
 
 ##########
 WRITING_TO*)##############################################################i
 ############
 case $lang in
-ru) echo -e "Файл записан в директорию $FC_3$2$FC_0";;
-uk) echo -e "Файл записаний в директорію $FC_3$2$FC_0";;
-*)  echo -e "File be written in $FC_3$2$FC_0";;
+ru) echo -e "Файл записан в директорию ${FC_3}$2${FC_0}";;
+uk) echo -e "Файл записаний в директорію ${FC_3}$2${FC_0}";;
+*)  echo -e "File be written in ${FC_3}$2${FC_0}";;
 esac;;
 
 ##########
 OVERWRITE_FILE*)###################################################
 ############
 case $lang in
-ru) echo -e "Перезаписать файл $FC_3$2$FC_0?";;
-uk) echo -e "Перезаписати файл $FC_3$2$FC_0?";;
-*)  echo -e "Overwrite the file $FC_3$2$FC_0?";;
+ru) echo -e "Перезаписать файл ${FC_3}$2${FC_0}?";;
+uk) echo -e "Перезаписати файл ${FC_3}$2${FC_0}?";;
+*)  echo -e "Overwrite the file ${FC_3}$2${FC_0}?";;
 esac;;
 
 ##########
 FAILED_TO_CREATE_DIR*)###################################################
 ############
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось создать каталог $FC_3$2$FC_0";;
-uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося створити каталог $FC_3$2$FC_0";;
-*)  echo -e "$FC_2ERROR:$FC_0 Failed to create directory $FC_3$2$FC_0";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Не удалось создать каталог ${FC_3}$2${FC_0}";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Не вдалося створити каталог ${FC_3}$2${FC_0}";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Failed to create directory ${FC_3}$2${FC_0}";;
 esac;;
 
 ##########
 NOT_FOUND_CONFIG*)###################################################
 ############
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Не найден конфигурационный файл $FC_3$2$FC_0";;
-uk) echo -e "$FC_2Помилка:$FC_0 Не знайдено конфігураційний файл $FC_3$2$FC_0";;
-*)  echo -e "$FC_2ERROR:$FC_0 Not found config file $FC_3$2$FC_0";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Не найден конфигурационный файл ${FC_3}$2${FC_0}";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Не знайдено конфігураційний файл ${FC_3}$2${FC_0}";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Not found config file ${FC_3}$2${FC_0}";;
 esac;;
 
 ##########
 NOT_SPECIFIED_PARAMETER*)###################################################
 ############
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Не указан параметр $FC_3$2$FC_0";;
-uk) echo -e "$FC_2Помилка:$FC_0 Не вказано параметр $FC_3$2$FC_0";;
-*)  echo -e "$FC_2ERROR:$FC_0 Not specified parameter $FC_3$2$FC_0";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Не указан параметр ${FC_3}$2${FC_0}";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Не вказано параметр ${FC_3}$2${FC_0}";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Not specified parameter ${FC_3}$2${FC_0}";;
 esac;;
 
 #############
 DIRECTORY_NOT_FOUND*)
 #############
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Каталог $FC_3$2$FC_0 не найден"
+ru) echo -e "${FC_2}Ошибка:${FC_0} Каталог ${FC_3}$2${FC_0} не найден"
 ;;
-uk) echo -e "$FC_2Помилка:$FC_0 Каталог $FC_3$2$FC_0 не знайдено"
+uk) echo -e "${FC_2}Помилка:${FC_0} Каталог ${FC_3}$2${FC_0} не знайдено"
 ;;
-*)  echo -e "$FC_2ERROR:$FC_0 Directory $FC_3$2$FC_0 not found"
+*)  echo -e "${FC_2}ERROR:${FC_0} Directory ${FC_3}$2${FC_0} not found"
 esac
 ;;
 
@@ -218,11 +218,11 @@ esac
 PACKAGE_NOT_FOUND_AUR*)
 #############
 case $lang in
-ru) echo -e "Пакет $FC_2$2$FC_0 не найден в AUR"
+ru) echo -e "Пакет ${FC_2}$2${FC_0} не найден в AUR"
 ;;
-uk) echo -e "Пакет $FC_2$2$FC_0 не знайдено в AUR"
+uk) echo -e "Пакет ${FC_2}$2${FC_0} не знайдено в AUR"
 ;;
-*)  echo -e "Package $FC_2$2$FC_0 not found in the AUR"
+*)  echo -e "Package ${FC_2}$2${FC_0} not found in the AUR"
 esac
 ;;
 
@@ -230,23 +230,11 @@ esac
 PACKAGE_LIST_EXCEPTION*)
 #############
 case $lang in
-ru) echo -e "Пакет $FC_3$2$FC_0 занесен в список исключений"
+ru) echo -e "Пакет ${FC_3}$2${FC_0} занесен в список исключений"
 ;;
-uk) echo -e "Пакет $FC_3$2$FC_0 занесений до списку виключень"
+uk) echo -e "Пакет ${FC_3}$2${FC_0} занесений до списку виключень"
 ;;
-*)  echo -e "The package $FC_3$2$FC_0 is listed in the exceptions list"
-esac
-;;
-
-#############
-PACKAGE_LIST_ONLY_WARN*)
-#############
-case $lang in
-ru) echo -e "Пакет $FC_3$2$FC_0 занесен в список только предупреждения"
-;;
-uk) echo -e "Пакет $FC_3$2$FC_0 занесений до списку тільки попередження"
-;;
-*)  echo -e "The package $FC_3$2$FC_0 is listed in the only warning list"
+*)  echo -e "The package ${FC_3}$2${FC_0} is listed in the exceptions list"
 esac
 ;;
 
@@ -254,9 +242,9 @@ esac
 PACK_LATEST_VERSION*)
 ################
 case $lang in
-ru) echo -e "Пакет $FC_3$2$FC_0 имеет последнюю версию";;
-uk) echo -e "Пакет $FC_3$2$FC_0 має останню версію";;
-*)  echo -e "The pack $FC_3$2$FC_0 has the latest version";;
+ru) echo -e "Пакет ${FC_3}$2${FC_0} имеет последнюю версию";;
+uk) echo -e "Пакет ${FC_3}$2${FC_0} має останню версію";;
+*)  echo -e "The pack ${FC_3}$2${FC_0} has the latest version";;
 esac
 ;;
 
@@ -264,9 +252,9 @@ esac
 FILE_NOT_FOUND*)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Файл $FC_2$2$FC_0 не найден";;
-uk) echo -e "$FC_2Помилка:$FC_0 Файл $FC_2$2$FC_0 не знайдено";;
-*)  echo -e "$FC_2ERROR:$FC_0 File $FC_2$2$FC_0 not found";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Файл ${FC_2}$2${FC_0} не найден";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Файл ${FC_2}$2${FC_0} не знайдено";;
+*)  echo -e "${FC_2}ERROR:${FC_0} File ${FC_2}$2${FC_0} not found";;
 esac
 ;;
 
@@ -274,9 +262,9 @@ esac
 NULL_URL_AUR*)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Пустой url AUR для пакета $FC_2$2$FC_0";;
-uk) echo -e "$FC_2Помилка:$FC_0 Порожній url AUR для пакета $FC_2$2$FC_0";;
-*)  echo -e "$FC_2ERROR:$FC_0 A null url AUR  for the package $FC_2$2$FC_0";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Пустой url AUR для пакета ${FC_2}$2${FC_0}";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Порожній url AUR для пакета ${FC_2}$2${FC_0}";;
+*)  echo -e "${FC_2}ERROR:${FC_0} A null url AUR  for the package ${FC_2}$2${FC_0}";;
 esac
 ;;
 
@@ -284,9 +272,9 @@ esac
 USER_NOT_EXIST*)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Пользователь $FC_2$2$FC_0 не существует";;
-uk) echo -e "$FC_2Помилка:$FC_0 Користувач $FC_2$2$FC_0 не існує";;
-*)  echo -e "$FC_2ERROR:$FC_0 The user $FC_2$2$FC_0 does not exist";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Пользователь ${FC_2}$2${FC_0} не существует";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Користувач ${FC_2}$2${FC_0} не існує";;
+*)  echo -e "${FC_2}ERROR:${FC_0} The user ${FC_2}$2${FC_0} does not exist";;
 esac
 ;;
 
@@ -304,9 +292,9 @@ esac
 FAILED_BUILD_PACKAGE*)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось собрать пакет $FC_2$2$FC_0";;
-uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося зібрати пакет $FC_2$2$FC_0";;
-*)  echo -e "$FC_2ERROR:$FC_0 Failed to build the package $FC_2$2$FC_0";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Не удалось собрать пакет ${FC_2}$2${FC_0}";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Не вдалося зібрати пакет ${FC_2}$2${FC_0}";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Failed to build the package ${FC_2}$2${FC_0}";;
 esac
 ;;
 
@@ -314,9 +302,9 @@ esac
 FAILED_UPDATE)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось обновить систему";;
-uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося оновити систему";;
-*)  echo -e "$FC_2ERROR:$FC_0 Failed to update the system";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Не удалось обновить систему";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Не вдалося оновити систему";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Failed to update the system";;
 esac
 ;;
 
@@ -324,9 +312,9 @@ esac
 FAILED_REMOVE_PACKAGE*)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось удалить пакет $2 из репозитория !!!";;
-uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося видалити пакет $2 з репозиторію !!!";;
-*)  echo -e "$FC_2ERROR:$FC_0 Failed to remove package $2 repository !!!";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Не удалось удалить пакет $2 из репозитория !!!";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Не вдалося видалити пакет $2 з репозиторію !!!";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Failed to remove package $2 repository !!!";;
 esac
 ;;
 
@@ -334,9 +322,9 @@ esac
 FAILED_ADD_PACKAGE*)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Не удалось добавить пакет $2 в репозитория !!!";;
-uk) echo -e "$FC_2Помилка:$FC_0 Не вдалося додати пакет $2 до репозиторію !!!";;
-*)  echo -e "$FC_2ERROR:$FC_0 Failed to append package $2 repository !!!";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Не удалось добавить пакет $2 в репозитория !!!";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Не вдалося додати пакет $2 до репозиторію !!!";;
+*)  echo -e "${FC_2}ERROR:${FC_0} Failed to append package $2 repository !!!";;
 esac
 ;;
 
@@ -344,9 +332,9 @@ esac
 ARCH_NOT_SUPPORTED*)
 ################
 case $lang in
-ru) echo -e "$FC_2Ошибка:$FC_0 Текущая архитектура пакетом $2 не поддерживается  !!!";;
-uk) echo -e "$FC_2Помилка:$FC_0 Поточна архітектура пакетом $2 не підтримується !!!";;
-*)  echo -e "$FC_2ERROR:$FC_0 The current architecture of the package $2 not supported !!!";;
+ru) echo -e "${FC_2}Ошибка:${FC_0} Текущая архитектура пакетом $2 не поддерживается  !!!";;
+uk) echo -e "${FC_2}Помилка:${FC_0} Поточна архітектура пакетом $2 не підтримується !!!";;
+*)  echo -e "${FC_2}ERROR:${FC_0} The current architecture of the package $2 not supported !!!";;
 esac
 ;;
 
