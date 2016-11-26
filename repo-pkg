@@ -278,7 +278,7 @@ add_pkg() {
      fi
      curl -fs "$PKG_URL" -o "$PKG_BUILD".tar.gz
      bsdtar --strip-components 0 -xvf $PKG_BUILD.tar.gz
-     rm "$PKG_BUILD".tar.gz
+     rm -f "$PKG_BUILD".tar.gz
      if ! [ -f ${REPO_DIR}/${PKG_BUILD}/PKGBUILD ]; then
         show_message FILE_NOT_FOUND ${REPO_DIR}/${PKG_BUILD}/PKGBUILD
         exit 0
@@ -323,7 +323,7 @@ add_pkg() {
   if [ "$?" = 1 ]; then
      if [ -f "$REPO_BACKUP_DIR/$PKG_BUILD"-backup.tar.gz ]; then
         cd "${REPO_DIR}"
-        rm -R "${REPO_DIR}/$PKG_BUILD"
+        rm -Rf "${REPO_DIR}/$PKG_BUILD"
         mv "$REPO_BACKUP_DIR/$PKG_BUILD"-backup.tar.gz .
         bsdtar --strip-components 0 -xvf "$PKG_BUILD"-backup.tar.gz
         rm -f "$PKG_BUILD"-backup.tar.gz
