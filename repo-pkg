@@ -264,7 +264,6 @@ add_pkg() {
      if [ -d "$PKG_BUILD" ]; then
         tar -zcvf "$PKG_BUILD"-backup.tar.gz "$PKG_BUILD"
         mv -f "$PKG_BUILD"-backup.tar.gz $REPO_BACKUP_DIR
-        rm -Rf "${REPO_DIR}/$PKG_BUILD"
      fi
   else
      PKG_URL=`package-query --aur-url https://aur.archlinux.org -Aif %u $PKG_BUILD`
@@ -322,7 +321,7 @@ add_pkg() {
   fi
   makepkg -scf --noconfirm
   if [ "$?" = 1 ]; then
-     if ! [ -f "$REPO_BACKUP_DIR/$PKG_BUILD"-backup.tar.gz ]; then
+     if [ -f "$REPO_BACKUP_DIR/$PKG_BUILD"-backup.tar.gz ]; then
         cd "${REPO_DIR}"
         rm -R "${REPO_DIR}/$PKG_BUILD"
         mv "$REPO_BACKUP_DIR/$PKG_BUILD"-backup.tar.gz .
@@ -332,6 +331,7 @@ add_pkg() {
         exit 1
      fi
   fi
+  exit 1
   for name in "${PKG_NAME[@]}"; do
       if extract_function_variable "package_$name" arch 1 list; then
          add_pkg_arch ${name} "`echo ${arch[*]}`"
