@@ -331,7 +331,6 @@ add_pkg() {
         exit 1
      fi
   fi
-  exit 1
   for name in "${PKG_NAME[@]}"; do
       if extract_function_variable "package_$name" arch 1 list; then
          add_pkg_arch ${name} "`echo ${arch[*]}`"
