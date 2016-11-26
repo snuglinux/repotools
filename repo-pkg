@@ -261,6 +261,11 @@ add_pkg() {
         show_message FILE_NOT_FOUND ${REPO_DIR}/$PKG_BUILD/PKGBUILD
         exit 1
      fi
+     if [ -d "$PKG_BUILD" ]; then
+        tar -zcvf "$PKG_BUILD"-backup.tar.gz "$PKG_BUILD"
+        mv -f "$PKG_BUILD"-backup.tar.gz $REPO_BACKUP_DIR
+        rm -Rf "${REPO_DIR}/$PKG_BUILD"
+     fi
   else
      PKG_URL=`package-query --aur-url https://aur.archlinux.org -Aif %u $PKG_BUILD`
      if [[ ! -n "$PKG_URL" ]]; then

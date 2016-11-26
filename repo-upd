@@ -219,18 +219,20 @@ pkgbuild(){
 #========================
 edit_email_file(){
   if [ -f $MAIL_TEMP ]; then
-    sed -i -e "s|\\\e\[0m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;30m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;31m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;32m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;33m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;34m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;35m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;36m||g" $MAIL_TEMP
-    sed -i -e "s|\\\e\[0;37m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;30m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;31m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;32m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;33m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;34m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;35m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;36m||g" $MAIL_TEMP
+     sed -i -e "s|.\[0;37m||g" $MAIL_TEMP
   fi
 }
 
+edit_email_file
+exit
 if [[ $EUID -ne 0 ]]; then
    show_message I_M_NOT_ROOT
    exit 1
@@ -246,6 +248,8 @@ if [ -n "$REPO_CONF" ]; then
       source $REPO_CONF
    fi
 fi
+edit_email_file
+exit
 
 cd "${REPO_DIR}"
 for DIR in * ; do

@@ -8,7 +8,9 @@ SHOW_USAGE)############################################################
 case $lang in
 ru)
 cat <<EOFUSAGE
-repo-upd - Скрипт для проверки обновлений локального и AUR репозиториев.
+repo-upd - Скрипт для проверки обновлений локального и AUR репозитория.
+Умеет отправлять изменений на электронную почту или автоматически собирать
+обновления пакетов AUR и обновлять их в локальном репозитории.
 
 Используются следующие опции командной строки:
 				
@@ -40,7 +42,9 @@ EOFUSAGE
 
 uk)
 cat <<EOFUSAGE
-repo-upd - Скрипт для перевірки оновлень локального і AUR репозиторіїв.
+repo-upd - Скрипт для перевірки оновлень локального і AUR репозиторію.
+Уміє відправляти змін на електронну пошту або автоматично збирати оновлення
+пакетів AUR і оновлювати їх у локальному сховищі.
 
 Використовуються наступні опції командного рядка:
 				
@@ -72,7 +76,9 @@ EOFUSAGE
 
 *)
 cat << EOFUSAGE
-repo-upd - Script to check for updates local and AUR repositories.
+repo-upd - Script to check for updates of the local repository and AUR.
+Able to send changes via e-mail or automatically collect updates to the
+AUR packages and update them to the local repository.
 
 Use the following command line options:
 				
