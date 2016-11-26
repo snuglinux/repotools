@@ -190,16 +190,17 @@ pkgbuild(){
      return
   fi
   for a in ${arch[@]}; do
-      if [[ "${a}" = "any" ]]; then
-         if [[ $ARCH_BUILD_ANY != $a ]]; then
-            continue
-         fi
-      fi
       if ! echo "$LIST_ARCH" | grep -q $a ; then
          continue
       fi
       if [[ "$a" = "i686" ]]; then
          linux32 chroot --userspec=pkg "$CHROOT_DIR/$a" repo-pkg -p=$pkgname
+      elif [[ "$a" = "any" ]]; then
+         if [[ $ARCH_BUILD_ANY = "i686" ]]; then
+            linux32 chroot --userspec=pkg "$CHROOT_DIR/$ARCH_BUILD_ANY" repo-pkg -p=$pkgname
+         else
+            chroot --userspec=pkg "$CHROOT_DIR/$ARCH_BUILD_ANY" repo-pkg -p=$pkgname
+         fi
       else
          chroot --userspec=pkg "$CHROOT_DIR/$a" repo-pkg -p=$pkgname
       fi
@@ -231,8 +232,6 @@ edit_email_file(){
   fi
 }
 
-edit_email_file
-exit
 if [[ $EUID -ne 0 ]]; then
    show_message I_M_NOT_ROOT
    exit 1
@@ -248,9 +247,6 @@ if [ -n "$REPO_CONF" ]; then
       source $REPO_CONF
    fi
 fi
-edit_email_file
-exit
-
 cd "${REPO_DIR}"
 for DIR in * ; do
     if ! [ -d $DIR ]; then
